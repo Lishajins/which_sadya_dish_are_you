@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Which Onam Dish Are You?</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #fff8e1;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #d97706;
+    }
+    .quiz-container {
+      max-width: 600px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .progress-container {
+      width: 100%;
+      background: #f3f4f6;
+      border-radius: 20px;
+      height: 18px;
+      margin: 15px 0;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #facc15;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+    }
+    .question {
+      margin: 20px 0;
+      font-weight: bold;
+    }
+    .options button, #restartBtn {
+      display: block;
+      margin: 8px auto;
+      padding: 10px 15px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      background: #facc15;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .options button:hover, #restartBtn:hover {
+      background: #fbbf24;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      color: #065f46;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌸 Which Onam Dish Are You? 🌸</h1>
+  <div class="quiz-container">
+    <div class="progress-text" id="progressText"></div>
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="quiz"></div>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Q1. How do your friends describe you?",
+        options: {
+          A: "Reliable and steady",
+          B: "Multi-talented and busy",
+          C: "Life of the party",
+          D: "Fun and playful"
+        },
+        map: { A: "Rice", B: "Sambar", C: "Payasam", D: "Banana Chips" }
+      },
+      {
+        question: "Q2. What’s your vibe when entering a room?",
+        options: {
+          A: "Loud & stylish",
+          B: "Funny & lighthearted",
+          C: "Spicy and chatty",
+          D: "Calm and collected"
+        },
+        map: { A: "Pachadi", B: "Pappadam", C: "Achaar", D: "Moru" }
+      },
+      {
+        question: "Q3. Which role do you take in a group project?",
+        options: {
+          A: "Backbone, holds it together",
+          B: "Juggling 10 tasks",
+          C: "Hype generator",
+          D: "Entertainer"
+        },
+        map: { A: "Rice", B: "Sambar", C: "Payasam", D: "Banana Chips" }
+      },
+      {
+        question: "Q4. How do you handle problems?",
+        options: {
+          A: "Bring balance & peace",
+          B: "Make jokes until it’s fine",
+          C: "Talk it out, spice it up",
+          D: "Add flair & creativity"
+        },
+        map: { A: "Moru", B: "Pappadam", C: "Achaar", D: "Pachadi" }
+      },
+      {
+        question: "Q5. If you were in the Sadya, people would say:",
+        options: {
+          A: "Without them, nothing’s complete",
+          B: "Everywhere at once, saving the day",
+          C: "The one we’ve been waiting for!",
+          D: "Can’t stop enjoying them again"
+        },
+        map: { A: "Rice", B: "Sambar", C: "Payasam", D: "Banana Chips" }
+      }
+    ];
+
+    const dishData = {
+      "Rice": {
+        desc: "🍚 Rice – The dependable base. Always there, never flashy, but without you nothing works.",
+        img: "images/rice.jpeg"
+      },
+      "Sambar": {
+        desc: "🥣 Sambar – The multitasker. Spicy, deep, energetic, and holding everything together.",
+        img: "images/sambar.jpeg"
+      },
+      "Payasam": {
+        desc: "🍮 Payasam – The showstopper. Sweet, hyped, and everyone waits for you.",
+        img: "images/payasam.jpeg"
+      },
+      "Banana Chips": {
+        desc: "🍌 Banana Chips – Fun and crunchy. Irresistible, people can’t stop coming back.",
+        img: "images/bananachips.jpeg"
+      },
+      "Pappadam": {
+        desc: "🍘 Pappadam – Loved by all, but a little fragile. Still, your crunch steals the spotlight.",
+        img: "images/pappadam.jpeg"
+      },
+      "Pachadi": {
+        desc: "🍍 Pachadi – Stylish, quirky, and unforgettable. You’re the fashion icon of the Sadya.",
+        img: "images/pachadi.jpeg"
+      },
+      "Achaar": {
+        desc: "🥒 Achaar – The firecracker. Chatty, spicy, and small but mighty.",
+        img: "images/achar.jpeg"
+      },
+      "Moru": {
+        desc: "🥛 Moru – The balancer. Cool, calming, basically therapy in a glass.",
+        img: "images/moru.jpeg"
+      }
+    };
+
+    let currentQ = 0;
+    let tally = {};
+
+    function updateProgress() {
+      document.getElementById("progressText").innerText = 
+        `Question ${currentQ + 1} of ${quizData.length}`;
+      const percent = ((currentQ) / quizData.length) * 100;
+      document.getElementById("progressBar").style.width = percent + "%";
+    }
+
+    function loadQuestion() {
+      const q = quizData[currentQ];
+      updateProgress();
+      let html = `<div class="question">${q.question}</div><div class="options">`;
+      for (const key in q.options) {
+        html += `<button onclick="selectAnswer('${q.map[key]}')">${q.options[key]}</button>`;
+      }
+      html += `</div>`;
+      document.getElementById("quiz").innerHTML = html;
+      document.getElementById("result").innerHTML = "";
+    }
+
+    function selectAnswer(dish) {
+      tally[dish] = (tally[dish] || 0) + 1;
+      currentQ++;
+      if (currentQ < quizData.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("progressText").innerText = "Done!";
+      document.getElementById("progressBar").style.width = "100%";
+
+      let bestDish = null;
+      let max = 0;
+      for (const dish in tally) {
+        if (tally[dish] > max) {
+          max = tally[dish];
+          bestDish = dish;
+        }
+      }
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("result").innerHTML = `
+        🎉 You are <strong>${bestDish}</strong>!<br><br>
+        <img src="${dishData[bestDish].img}" alt="${bestDish}" style="width:200px; border-radius:12px; margin:15px 0;"><br>
+        ${dishData[bestDish].desc}<br><br>
+        <button id="restartBtn" onclick="restartQuiz()">🔄 Restart Quiz</button>
+      `;
+    }
+
+    function restartQuiz() {
+      currentQ = 0;
+      tally = {};
+      loadQuestion();
+    }
+
+    // start
+    loadQuestion();
+  </script>
+</body>
+</html>
